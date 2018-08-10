@@ -1,0 +1,4 @@
+chaincodes:
+  marbles:
+    path: /
+    language: go
