@@ -1,3 +1,12 @@
+# This is a configuration file used by Xooa platform to configure and deploy the chaincode.
+# You should add following parameters in this file
+# chaincodes: Use this key to specify the details of chaincodes present in the repo. You can add multiple chaincodes in a single repo and mention them under this key.
+#   <chaincode-name>: Set this key to refer your chaincode with this name on Xooa platform
+#     path: <Add the relative path to the chaincode in this key>
+#     language: <Specify the language in which the chaincode is written. you can specify languages amongst: {go, node, composer}>
+# Optionally you can add:
+# Name: <Name of the app>
+# AppInfo: <Description about the app>  
 chaincodes:
   marbles:
     path: /

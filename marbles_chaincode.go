@@ -60,8 +60,10 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.getHistoryForDevice(stub, args)
 	} else if function == "getEvent" {
 		return t.getEvent(stub, args)
-	} else if function == "querylocation" {
-		return t.querylocation(stub, args)
+	} else if function == "queryLocation" {
+		return t.queryLocation(stub, args)
+	} else if function == "queryDevice" {
+		return t.queryDevice(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -262,7 +264,7 @@ func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 	return buffer.Bytes(), nil
 }
 
-func (t *SimpleAsset) querylocation(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	//   0
 	// "bob"
@@ -270,9 +272,28 @@ func (t *SimpleAsset) querylocation(stub shim.ChaincodeStubInterface, args []str
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
-	location := args[0]
+	locationId := args[0]
 
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\"}}", location)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"deviceId\", \"value\",\"time\"]\r\n}", locationId)
+
+	queryResults, err := getQueryResultForQueryString(stub, queryString)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	return shim.Success(queryResults)
+}
+
+func (t *SimpleAsset) queryDevice(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+
+	//   0
+	// "bob"
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	locationId := args[0]
+	deviceId := args[1]
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\"}}", locationId, deviceId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
