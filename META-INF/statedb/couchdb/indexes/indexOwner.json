@@ -1,1 +1,31 @@
-{"index":{"fields":["docType","owner"]},"ddoc":"indexOwnerDoc", "name":"indexOwner","type":"json"}
+{
+    "index":{
+        "fields":["locationId"]
+    },
+    "ddoc":"indexLocationDoc",
+    "name":"indexOwner",
+    "type":"json"
+}
+{
+    "index": {
+        "fields": [
+            "locationId",
+            "deviceId"
+        ]
+    },
+    "ddoc": "indexDeviceDoc",
+    "name": "indexOwner",
+    "type": "json"
+}
+{
+    "index": {
+        "fields": [
+            "locationId",
+            "deviceId",
+            "time"
+        ]
+    },
+    "ddoc": "indexDateDoc",
+    "name": "indexOwner",
+    "type": "json"
+}
