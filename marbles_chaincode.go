@@ -53,10 +53,6 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	if function == "saveNewEvent" {
 		return t.saveNewEvent(stub, args)
-	} else if function == "getDeviceLastEvent" {
-		return t.getDeviceLastEvent(stub)
-	} else if function == "getHistoryForDevice" {
-		return t.getHistoryForDevice(stub, args)
 	} else if function == "queryLocation" {
 		return t.queryLocation(stub, args)
 	} else if function == "queryByTime" {
