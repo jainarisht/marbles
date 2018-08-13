@@ -86,7 +86,8 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	value := strings.ToLower(args[14])
 	name := strings.ToLower(args[15])
 	time := strings.ToLower(args[16])
-
+	date := strings.Replace(time, "-", "", -1)
+	date = strings.Split(date, "t")[0]
 	//Building the event json string manually without struct marshalling
 	eventJSONasString := `{"docType":"Event",  "displayName": "` + displayName + `",
 	 "device": "` + device + `", "isStateChange": "` + isStateChange + `",
@@ -94,7 +95,7 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	 "descriptionText": "` + descriptionText + `", "installedSmartAppId": "` + installedSmartAppID + `",
 	 "isDigital": "` + isDigital + `", "isPhysical": "` + isPhysical + `", "deviceId": "` + deviceID + `",
 	 "location": "` + location + `", "locationId": "` + locationID + `", "source": "` + source + `",
-	 "unit": "` + unit + `", "value": "` + value + `", "name": "` + name + `", "time": "` + time + `"}`
+	 "unit": "` + unit + `", "value": "` + value + `", "name": "` + name + `", "time": "` + time + `", "date": "` + date + `"}`
 	eventJSONasBytes := []byte(eventJSONasString)
 
 	err1 := stub.PutState(deviceID, eventJSONasBytes)
@@ -165,7 +166,7 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 
 	locationId := args[0]
 
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}", locationId)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}", locationId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
@@ -184,9 +185,8 @@ func (t *SimpleAsset) queryByTime(stub shim.ChaincodeStubInterface, args []strin
 
 	locationId := args[0]
 	deviceId := args[1]
-	startDate := fmt.Sprintf("%st00:00:00.000z", args[2])
-	endDate := fmt.Sprintf("%st23:59:59.999z", args[2])
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"time\":{\"$in\":[%s, %s]}},\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, startDate, endDate)
+	date := args[2]
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"date\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
