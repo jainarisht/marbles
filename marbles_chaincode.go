@@ -186,7 +186,7 @@ func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []strin
 	locationId := args[0]
 	deviceId := args[1]
 	date := args[2]
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\",\"date\"]\r\n}", locationId, deviceId, date)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"],\r\n    \"sort\": [\"time\":\"desc\"]\r\n}", locationId, deviceId, date)
 	// queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
