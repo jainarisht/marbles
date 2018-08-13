@@ -179,13 +179,12 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 // It retrieves all the history of the device for particular date.
 func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
-	if len(args) < 2 {
+	if len(args) < 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
 
 	locationId := args[0]
-	deviceId := args[1]
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId, deviceId)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
