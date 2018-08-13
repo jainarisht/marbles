@@ -184,8 +184,8 @@ func (t *SimpleAsset) queryByTime(stub shim.ChaincodeStubInterface, args []strin
 
 	locationId := args[0]
 	deviceId := args[1]
-	startDate := fmt.Sprintf("%sT00:00:00.000Z", args[2])
-	endDate := fmt.Sprintf("%sT23:59:59.999Z", args[2])
+	startDate := fmt.Sprintf("%st00:00:00.000z", args[2])
+	endDate := fmt.Sprintf("%st23:59:59.999z", args[2])
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"time\":{\"$in\":[%s, %s]}},\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, startDate, endDate)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
