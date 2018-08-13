@@ -186,7 +186,7 @@ func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []strin
 	locationId := args[0]
 	deviceId := args[1]
 	date := args[2]
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"date\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId, deviceId, date)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId, deviceId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
