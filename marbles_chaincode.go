@@ -60,6 +60,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.queryByDate(stub, args)
 	} else if function == "getHistoryByDate" {
 		return t.getHistoryByDate(stub, args)
+	} else if function == "getDeviceLastEvent" {
+		return t.getDeviceLastEvent(stub)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -249,5 +251,41 @@ func (t *SimpleAsset) getHistoryByDate(stub shim.ChaincodeStubInterface, args []
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
+	return shim.Success(buffer.Bytes())
+}
+
+func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface) peer.Response {
+	resultsIterator, err := stub.GetStateByRange("", "")
+	if err != nil {
+		return shim.Error("Failed to get data " + err.Error())
+	}
+	defer resultsIterator.Close()
+
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"DeviceId\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.Key)
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Record\":")
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
 	return shim.Success(buffer.Bytes())
 }
