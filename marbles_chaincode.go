@@ -29,6 +29,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -57,6 +58,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.queryLocation(stub, args)
 	} else if function == "queryByDate" {
 		return t.queryByDate(stub, args)
+	} else if function == "getHistoryByDate" {
+		return t.getHistoryByDate(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -97,8 +100,12 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	 "location": "` + location + `", "locationId": "` + locationID + `", "source": "` + source + `",
 	 "unit": "` + unit + `", "value": "` + value + `", "name": "` + name + `", "time": "` + time + `", "date": "` + date + `"}`
 	eventJSONasBytes := []byte(eventJSONasString)
-
-	err1 := stub.PutState(deviceID, eventJSONasBytes)
+	arr := []string{deviceID, date}
+	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
+	if err != nil {
+		return shim.Error("Failed to set composite key")
+	}
+	err1 := stub.PutState(myCompositeKey, eventJSONasBytes)
 	if err1 != nil {
 		return shim.Error("Failed to set asset")
 	}
@@ -185,13 +192,62 @@ func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []strin
 
 	locationId := args[0]
 	deviceId := args[1]
-	// date := args[2]
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId)
-	// queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId)
+	date := args[2]
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 	return shim.Success(queryResults)
+}
+
+func (t *SimpleAsset) getHistoryByDate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 2 {
+		return shim.Error("incorrect arguments. Expecting 2")
+	}
+	deviceId := args[0]
+	date := args[1]
+	arr := []string{deviceId, date}
+	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
+	if err != nil {
+		return shim.Error("Failed to set composite key")
+	}
+	resultsIterator, err := stub.GetHistoryForKey(myCompositeKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+	// buffer is a JSON array containing historic values for the marble
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"TxId\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.TxId)
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Timestamp\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(time.Unix(queryResponse.Timestamp.Seconds, int64(queryResponse.Timestamp.Nanos)).String())
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Record\":")
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+	return shim.Success(buffer.Bytes())
 }
