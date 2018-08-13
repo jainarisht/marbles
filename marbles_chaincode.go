@@ -55,8 +55,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.saveNewEvent(stub, args)
 	} else if function == "queryLocation" {
 		return t.queryLocation(stub, args)
-	} else if function == "queryByTime" {
-		return t.queryByTime(stub, args)
+	} else if function == "queryByDate" {
+		return t.queryByDate(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -177,7 +177,7 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 
 // queryByTime creates a rich query to query using locationId, deviceId and date.
 // It retrieves all the history of the device for particular date.
-func (t *SimpleAsset) queryByTime(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) < 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 3")
@@ -186,7 +186,7 @@ func (t *SimpleAsset) queryByTime(stub shim.ChaincodeStubInterface, args []strin
 	locationId := args[0]
 	deviceId := args[1]
 	date := args[2]
-	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"date\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, date)
+	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"Event\",\"locationId\":\"%s\",\"deviceId\":\"%s\",\"date\":\"%s\"},\r\n    \"fields\": [\"value\",\"time\"]\r\n,\r\n    \"sort\": [{\"time\":\"desc\"}]\r\n}", locationId, deviceId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
