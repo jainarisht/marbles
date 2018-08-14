@@ -255,7 +255,7 @@ func (t *SimpleAsset) getHistoryByDate(stub shim.ChaincodeStubInterface, args []
 }
 
 func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface) peer.Response {
-	resultsIterator, err := stub.GetStateByRange("", "")
+	resultsIterator, err := stub.GetStateByRange("a", "z")
 	if err != nil {
 		return shim.Error("Failed to get data " + err.Error())
 	}
