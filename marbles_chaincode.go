@@ -28,6 +28,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -181,6 +182,7 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	queryResults = url.QueryUnescape(queryResults)
 	return shim.Success(queryResults)
 }
 
