@@ -55,8 +55,6 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	if function == "saveNewEvent" {
 		return t.saveNewEvent(stub, args)
-	} else if function == "queryLocation" {
-		return t.queryLocation(stub, args)
 	} else if function == "queryByDate" {
 		return t.queryByDate(stub, args)
 	} else if function == "getHistoryByDate" {
@@ -168,10 +166,10 @@ func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 
 // queryLocation creates a rich query to query the location using locationId.
 // It retrieve all the devices and their last states for that location.
-func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) string {
 
 	if len(args) < 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
+		return "Incorrect number of arguments. Expecting 1"
 	}
 
 	locationId := args[0]
@@ -180,16 +178,16 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
-		return shim.Error(err.Error())
+		return err.Error()
 	}
 	queryResultsString, err := url.QueryUnescape(string(queryResults))
 	queryResultsString, err = url.QueryUnescape(string(queryResultsString))
 
 	if err != nil {
-		return shim.Error(err.Error())
+		return err.Error()
 	}
 	queryResults = []byte(queryResultsString)
-	return shim.Success(queryResults)
+	return queryResultsString
 }
 
 // queryByTime creates a rich query to query using locationId, deviceId and date.
