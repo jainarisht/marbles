@@ -183,6 +183,8 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 		return shim.Error(err.Error())
 	}
 	queryResultsString, err := url.QueryUnescape(string(queryResults))
+	queryResultsString, err = url.QueryUnescape(string(queryResultsString))
+
 	if err != nil {
 		return shim.Error(err.Error())
 	}
