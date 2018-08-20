@@ -166,10 +166,10 @@ func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 
 // queryLocation creates a rich query to query the location using locationId.
 // It retrieve all the devices and their last states for that location.
-func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) string {
+func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) < 1 {
-		return "Incorrect number of arguments. Expecting 1"
+		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
 	locationId := args[0]
@@ -178,16 +178,16 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
-		return err.Error()
+		return shim.Error(err.Error())
 	}
-	queryResultsString, err := url.QueryUnescape(string(queryResults))
+	queryResultsString := strings.Replace(string(queryResults), "\\u0000", "||", -1)
 	queryResultsString, err = url.QueryUnescape(string(queryResultsString))
 
 	if err != nil {
-		return err.Error()
+		return shim.Error(err.Error())
 	}
 	queryResults = []byte(queryResultsString)
-	return queryResultsString
+	return shim.Success(queryResults)
 }
 
 // queryByTime creates a rich query to query using locationId, deviceId and date.
