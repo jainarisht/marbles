@@ -61,6 +61,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.getHistoryByDate(stub, args)
 	} else if function == "getDeviceLastEvent" {
 		return t.getDeviceLastEvent(stub)
+	} else if function == "queryLocation" {
+		return t.queryLocation(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
