@@ -182,7 +182,7 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	queryResultsString := strings.Replace(string(queryResults), "\\u0000", "||", -1)
+	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
 	queryResultsString, err = url.QueryUnescape(string(queryResultsString))
 
 	if err != nil {
