@@ -103,9 +103,8 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	 "unit": "` + unit + `", "value": "` + value + `", "name": "` + name + `", "time": "` + time + `", "date": "` + date + `"}`
 	eventJSONasBytes := []byte(eventJSONasString)
 
-	eventLessArgsString := `{"docType":"EventLess",  "displayName": "` + displayName + `",
-	 "deviceId": "` + deviceID + `", "value": "` + value + `",
-	 "time": "` + time + `", "date": "` + date + `", "locationId": "` + locationID + `"}`
+	eventLessArgsString := `{"docType":"EventLess",  "displayName": "` + displayName + `", "value": "` + value + `",
+	 "time": "` + time + `", "locationId": "` + locationID + `"}`
 	eventLessArgs := []byte(eventLessArgsString)
 	err := stub.PutState(deviceID, eventLessArgs)
 	if err != nil {
@@ -216,9 +215,11 @@ func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []strin
 	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
+	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	queryResults = []byte(queryResultsString)
 	return shim.Success(queryResults)
 }
 
