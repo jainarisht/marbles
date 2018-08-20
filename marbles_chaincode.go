@@ -28,7 +28,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 
@@ -103,13 +102,23 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	 "location": "` + location + `", "locationId": "` + locationID + `", "source": "` + source + `",
 	 "unit": "` + unit + `", "value": "` + value + `", "name": "` + name + `", "time": "` + time + `", "date": "` + date + `"}`
 	eventJSONasBytes := []byte(eventJSONasString)
-	arr := []string{deviceID, date}
+
+	eventLessArgsString := `{"docType":"EventLess",  "displayName": "` + displayName + `",
+	 "deviceId": "` + deviceID + `", "value": "` + value + `",
+	 "time": "` + time + `", "date": "` + date + `", "locationId": "` + locationID + `"}`
+	eventLessArgs := []byte(eventLessArgsString)
+	err := stub.PutState(deviceID, eventLessArgs)
+	if err != nil {
+		return shim.Error("Failed to set asset")
+	}
+
+	arr := []string{deviceID, time}
 	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
 	if err != nil {
 		return shim.Error("Failed to set composite key")
 	}
-	err1 := stub.PutState(myCompositeKey, eventJSONasBytes)
-	if err1 != nil {
+	err = stub.PutState(myCompositeKey, eventJSONasBytes)
+	if err != nil {
 		return shim.Error("Failed to set asset")
 	}
 	return shim.Success([]byte(device))
@@ -176,14 +185,15 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 
 	locationId := args[0]
 
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\",\"date\"]\r\n}", locationId)
+	// queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\",\"date\"]\r\n}", locationId)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"EventLess\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}", locationId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
-	queryResultsString, err = url.QueryUnescape(string(queryResultsString))
+	// queryResultsString, err = url.QueryUnescape(string(queryResultsString))
 
 	if err != nil {
 		return shim.Error(err.Error())
