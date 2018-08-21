@@ -295,7 +295,7 @@ func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface, args 
 
 	locationId := args[0]
 	deviceId := args[1]
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"],\r\n    \"limit\": 1\r\n}", locationId, deviceId)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"],\r\n    \"sort\": [{\"time\": \"desc\"}],\r\n    \"limit\": 1\r\n}", locationId, deviceId)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
