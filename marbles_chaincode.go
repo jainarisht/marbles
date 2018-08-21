@@ -58,8 +58,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.queryByDate(stub, args)
 	} else if function == "getHistoryByDate" {
 		return t.getHistoryByDate(stub, args)
-	} else if function == "getDeviceLastEvent" {
-		return t.getDeviceLastEvent(stub)
+	} else if function == "getDeviceList" {
+		return t.getDeviceList(stub, args)
 	} else if function == "queryLocation" {
 		return t.queryLocation(stub, args)
 	} else if function == "saveDevice" {
@@ -72,8 +72,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 // saveNewEvent stores the event on the ledger. For each device
 // it will override the current state with the new one
 func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	if len(args) != 17 {
-		return shim.Error("incorrect arguments. Expecting full event details")
+	if len(args) != 5 {
+		return shim.Error("incorrect arguments. Expecting full event details. Expecting 5 args")
 	}
 
 	displayName := strings.ToLower(args[0])
@@ -268,8 +268,12 @@ func (t *SimpleAsset) getHistoryByDate(stub shim.ChaincodeStubInterface, args []
 	return shim.Success(buffer.Bytes())
 }
 
-func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface) peer.Response {
-	resultsIterator, err := stub.GetStateByRange("a", "z")
+func (t *SimpleAsset) getDeviceList(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("incorrect arguments. Expecting 1")
+	}
+	locationId := args[0]
+	resultsIterator, err := stub.GetState(locationId)
 	if err != nil {
 		return shim.Error("Failed to get data " + err.Error())
 	}
@@ -289,7 +293,7 @@ func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface) peer.
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString("{\"DeviceId\":")
+		buffer.WriteString("{\"LocationId\":")
 		buffer.WriteString("\"")
 		buffer.WriteString(queryResponse.Key)
 		buffer.WriteString("\"")
