@@ -62,6 +62,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.getDeviceLastEvent(stub)
 	} else if function == "queryLocation" {
 		return t.queryLocation(stub, args)
+	} else if function == "saveDevice" {
+		return t.saveDevice(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -121,6 +123,30 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error("Failed to set asset")
 	}
 	return shim.Success([]byte(device))
+}
+
+// main function starts up the chaincode in the container during instantiate
+func main() {
+	if err := shim.Start(new(SimpleAsset)); err != nil {
+		fmt.Printf("Error starting SimpleAsset chaincode: %s", err)
+	}
+}
+
+func (t *SimpleAsset) saveDevice(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+
+	locationID := strings.ToLower(args[0])
+	deviceIdList := args[1]
+	deviceNameList := args[2]
+
+	//Building the event json string manually without struct marshalling
+	deviceJSONasString := `{"docType":"deviceId",  "ids": "` + deviceIdList + `", "names": "` + deviceNameList + `"}`
+	deviceJSONasBytes := []byte(deviceJSONasString)
+	err := stub.PutState(locationid, deviceJSONasBytes)
+	if err != nil {
+		return shim.Error("Failed to set asset")
+	}
+
+	return shim.Success([]byte(locationID))
 }
 
 // main function starts up the chaincode in the container during instantiate
