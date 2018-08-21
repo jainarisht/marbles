@@ -64,6 +64,8 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return t.queryLocation(stub, args)
 	} else if function == "saveDevice" {
 		return t.saveDevice(stub, args)
+	} else if function == "getDeviceLastEvent" {
+		return t.getDeviceLastEvent(stub, args)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -89,7 +91,7 @@ func (t *SimpleAsset) saveNewEvent(stub shim.ChaincodeStubInterface, args []stri
 	 "value": "` + value + `", "time": "` + time + `", "date": "` + date + `"}`
 	eventJSONasBytes := []byte(eventJSONasString)
 
-	arr := []string{deviceID, time}
+	arr := []string{deviceID, date}
 	myCompositeKey, err := stub.CreateCompositeKey("combined", arr)
 	if err != nil {
 		return shim.Error("Failed to set composite key")
@@ -284,4 +286,22 @@ func (t *SimpleAsset) getDeviceList(stub shim.ChaincodeStubInterface, args []str
 		return shim.Error(jsonResp)
 	}
 	return shim.Success(valueAsBytes)
+}
+
+func (t *SimpleAsset) getDeviceLastEvent(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) < 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	locationId := args[0]
+	deviceId := args[1]
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"],\r\n    \"sort\": [\"time\":\"desc\"],\r\n    \"limit\": 1\r\n}", locationId, deviceId)
+
+	queryResults, err := getQueryResultForQueryString(stub, queryString)
+	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	queryResults = []byte(queryResultsString)
+	return shim.Success(queryResults)
 }
