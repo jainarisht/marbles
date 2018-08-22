@@ -8,8 +8,7 @@
 #   <chaincode-name>:     -> Name of the chaincode to be installed on Xooa platform.
 #     path:               -> Path to the chaincode directory relative to Repo root
 #     language:           -> Language of chaincode source code. Options are node, go, composer (for Fabric Composer Apps)
-
 chaincodes:
-  marbles:
-    path: /
+  smartthings:
+    path: /Chaincode/
     language: go
