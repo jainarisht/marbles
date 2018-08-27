@@ -178,9 +178,7 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
-	locationId := args[0]
-
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"EventLess\",\r\n        \"locationId\": \"%s\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}", locationId)
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"EventLess\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}")
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
@@ -198,13 +196,12 @@ func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []str
 func (t *SimpleAsset) queryByDate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 3")
+		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 
-	locationId := args[0]
-	deviceId := args[1]
-	date := args[2]
-	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"locationId\": \"%s\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"]\r\n}", locationId, deviceId, date)
+	deviceId := args[0]
+	date := args[1]
+	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"Event\",\r\n        \"deviceId\": \"%s\",\r\n        \"date\": \"%s\"\r\n    },\r\n    \"fields\": [\"value\",\"time\"]\r\n}", deviceId, date)
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	queryResultsString := strings.Replace(string(queryResults), "\u0000", "||", -1)
