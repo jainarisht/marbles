@@ -56,7 +56,7 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	} else if function == "queryByDate" {
 		return t.queryByDate(stub, args)
 	} else if function == "queryLocation" {
-		return t.queryLocation(stub, args)
+		return t.queryLocation(stub)
 	}
 
 	return shim.Error("Invalid function name for 'invoke'")
@@ -172,11 +172,7 @@ func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 
 // queryLocation creates a rich query to query the location using locationId.
 // It retrieve all the devices and their last states for that location.
-func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-
-	if len(args) < 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
-	}
+func (t *SimpleAsset) queryLocation(stub shim.ChaincodeStubInterface) peer.Response {
 
 	queryString := fmt.Sprintf("{\r\n    \"selector\": {\r\n        \"docType\": \"EventLess\"\r\n    },\r\n    \"fields\": [\"displayName\", \"value\",\"time\"]\r\n}")
 
